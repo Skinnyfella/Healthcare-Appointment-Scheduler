@@ -6,6 +6,7 @@ import LandingPage from './pages/LandingPage'
 import BookingPage from './pages/BookingPage'
 import AppointmentsPage from './pages/AppointmentsPage'
 import { LanguageContext } from './context/LanguageContext'
+import { AuthProvider } from './context/AuthContext'
 
 function App() {
   const [language, setLanguage] = useState('en')
