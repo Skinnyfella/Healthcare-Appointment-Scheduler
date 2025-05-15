@@ -1,21 +1,13 @@
-import pkg from 'pg';
-const { Pool } = pkg;
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
-const pool = new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'healthcare_appointments',
-    password: 'skinnyfella',
-    port: 5432,
-});
+dotenv.config();
 
-// Test the connection
-pool.connect((err) => {
-    if (err) {
-        console.error('Database connection error:', err.stack);
-    } else {
-        console.log('Successfully connected to PostgreSQL');
-    }
-});
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY; // Using anon key for now, should use service key in production
 
-export default pool;
+if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Missing Supabase credentials');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey);

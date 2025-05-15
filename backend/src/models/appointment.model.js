@@ -1,35 +1,34 @@
-import pool from '../config/database.js';
+import { supabase } from '../config/database.js';
 import { APPOINTMENT_STATUS } from '../config/constants.js';
 
 export const AppointmentModel = {
     // Create new appointment
     async create(appointmentData) {
-        const query = `
-            INSERT INTO appointments (full_name, appointment_type, date, time, notes, status)
-            VALUES ($1, $2, $3, $4, $5, $6)
-            RETURNING *
-        `;
-        const values = [
-            appointmentData.fullName,
-            appointmentData.appointmentType,
-            appointmentData.date,
-            appointmentData.time,
-            appointmentData.notes,
-            APPOINTMENT_STATUS.REQUESTED
-        ];
+        const { data, error } = await supabase
+            .from('appointments')
+            .insert({
+                full_name: appointmentData.fullName,
+                appointment_type: appointmentData.appointmentType,
+                date: appointmentData.date,
+                time: appointmentData.time,
+                notes: appointmentData.notes,
+                status: APPOINTMENT_STATUS.REQUESTED,
+                user_id: appointmentData.userId
+            })
+            .select();
 
         const { rows } = await pool.query(query, values);
         return rows[0];
-    },    // Get all appointments
-    async getAll() {
-        try {
-            const result = await pool.query(
-                'SELECT * FROM appointments ORDER BY date ASC, time ASC'
-            );
-            return result.rows;
-        } catch (error) {
-            throw new Error(`Error fetching appointments: ${error.message}`);
-        }
+    },    // Get all appointments for a user
+    async getAll(userId) {
+        const { data, error } = await supabase
+            .from('appointments')
+            .select('*')
+            .eq('user_id', userId)
+            .order('date', { ascending: true });
+            
+        if (error) throw error;
+        return data;
     },
 
     // Get appointment by ID

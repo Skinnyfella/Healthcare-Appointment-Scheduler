@@ -11,12 +11,11 @@ const LoginForm = () => {
         e.preventDefault();
         setMessage('');
         setError('');
-        
-        const { error, message } = await signIn(email);
+          const { error } = await signIn(email);
         if (error) {
-            setError(error);
+            setError(error.message);
         } else {
-            setMessage(message);
+            setMessage('Check your email for the login link!');
             setEmail('');
         }
     };
