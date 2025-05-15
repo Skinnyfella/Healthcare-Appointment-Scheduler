@@ -4,19 +4,16 @@ import { validateAppointment } from '../middleware/validation.middleware.js';
 
 const router = express.Router();
 
-// Create appointment
+// Create new appointment (from AppointmentForm)
 router.post('/', validateAppointment, AppointmentController.createAppointment);
 
-// Get all appointments
+// Get all appointments (for displaying in AppointmentCard)
 router.get('/', AppointmentController.getAllAppointments);
 
-// Get specific appointment
-router.get('/:id', AppointmentController.getAppointment);
-
-// Update appointment
+// Update/Reschedule appointment
 router.put('/:id', validateAppointment, AppointmentController.updateAppointment);
 
-// Delete appointment
+// Cancel/Delete appointment
 router.delete('/:id', AppointmentController.deleteAppointment);
 
 export default router;
