@@ -1,9 +1,12 @@
 import express from 'express';
 import { AppointmentController } from '../controllers/appointments/appointment.controller.js';
 import { validateAppointment } from '../middleware/validation.middleware.js';
-import { supabase } from '../config/supabase.js';
+import { authMiddleware } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
+
+// Apply auth middleware to all appointment routes
+router.use(authMiddleware);
 
 // Create new appointment (from AppointmentForm)
 router.post('/', validateAppointment, AppointmentController.createAppointment);

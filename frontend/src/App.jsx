@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer'
 import LandingPage from './pages/LandingPage'
 import BookingPage from './pages/BookingPage'
 import AppointmentsPage from './pages/AppointmentsPage'
+import ProtectedRoute from './components/auth/ProtectedRoute'
 import { LanguageContext } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 
@@ -20,7 +21,14 @@ function App() {
             <Routes>
               <Route path="/" element={<LandingPage />} />
               <Route path="/book" element={<BookingPage />} />
-              <Route path="/appointments" element={<AppointmentsPage />} />
+              <Route 
+                path="/appointments" 
+                element={
+                  <ProtectedRoute>
+                    <AppointmentsPage />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
           <Footer />
