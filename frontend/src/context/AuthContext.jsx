@@ -14,9 +14,10 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         });
 
-        // Listen for changes on auth state (sign in, sign out, etc.)
+        // Listen for auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
+            setLoading(false);
         });
 
         return () => subscription.unsubscribe();
@@ -27,7 +28,8 @@ export const AuthProvider = ({ children }) => {
             const { error } = await supabase.auth.signInWithOtp({
                 email,
                 options: {
-                    emailRedirectTo: window.location.origin,
+                    emailRedirectTo: `${window.location.origin}/book`,
+                    shouldCreateUser: true
                 }
             });
             if (error) throw error;

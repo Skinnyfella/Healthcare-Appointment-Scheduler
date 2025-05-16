@@ -1,4 +1,5 @@
 import { useState, useContext, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { FaMicrophone, FaMicrophoneSlash } from 'react-icons/fa'
 import { LanguageContext } from '../../context/LanguageContext'
@@ -6,8 +7,10 @@ import DatePicker from 'react-datepicker'
 import "react-datepicker/dist/react-datepicker.css"
 import { startSpeechRecognition, stopSpeechRecognition } from '../../utils/speechRecognition'
 import { appointmentTypes, timeSlots } from '../../data/dummyData'
+import { appointments } from '../../config/supabase'
 
 const AppointmentForm = () => {
+  const navigate = useNavigate()
   const { language } = useContext(LanguageContext)
   const [formData, setFormData] = useState({
     fullName: '',
@@ -20,6 +23,7 @@ const AppointmentForm = () => {
   const [recordingFor, setRecordingFor] = useState(null)
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const recognitionRef = useRef(null)
   
   const translations = {
@@ -99,7 +103,7 @@ const AppointmentForm = () => {
     setFormData(prev => ({ ...prev, date }))
   }
   
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     // Validation
@@ -110,24 +114,43 @@ const AppointmentForm = () => {
     
     // Clear any previous errors
     setError('')
+    setIsSubmitting(true)
     
-    // In a real app, this would submit to a backend
-    console.log('Appointment booked:', formData)
-    
-    // Show success message
-    setSuccessMessage(text.success)
-    
-    // Reset form after a delay
-    setTimeout(() => {
-      setFormData({
-        fullName: '',
-        appointmentType: '',
-        date: null,
-        time: '',
-        notes: ''
+    try {
+      // Format date for Supabase
+      const formattedDate = formData.date.toISOString().split('T')[0]
+      
+      // Create appointment in Supabase
+      const { data, error: submitError } = await appointments.create({
+        full_name: formData.fullName,
+        appointment_type: formData.appointmentType,
+        date: formattedDate,
+        time: formData.time,
+        notes: formData.notes,
+        status: 'requested'
       })
-      setSuccessMessage('')
-    }, 3000)
+
+      if (submitError) throw submitError
+
+      // Show success message
+      setSuccessMessage(text.success)
+      
+      // Reset form and redirect after delay
+      setTimeout(() => {
+        setFormData({
+          fullName: '',
+          appointmentType: '',
+          date: null,
+          time: '',
+          notes: ''
+        })
+        navigate('/appointments')
+      }, 2000)
+    } catch (err) {
+      setError(err.message || text.errorGeneric)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
   
   const toggleSpeechRecognition = (field) => {
@@ -331,7 +354,7 @@ const AppointmentForm = () => {
           <button 
             type="submit"
             className="btn btn-primary w-full py-3"
-            disabled={isRecording}
+            disabled={isRecording || isSubmitting}
           >
             {text.submit}
           </button>

@@ -45,12 +45,12 @@ const AppointmentCard = ({ appointment }) => {
   const getStatusClass = (status) => {
     return status === 'confirmed' 
       ? 'bg-green-100 text-green-800' 
-      : 'bg-yellow-100 text-yellow-800';
+      : 'bg-yellow-100 text-yellow-800'
   }
   
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return format(date, 'MMMM d, yyyy');
+    const date = new Date(dateString)
+    return format(date, 'MMMM d, yyyy')
   }
 
   return (
@@ -60,27 +60,27 @@ const AppointmentCard = ({ appointment }) => {
       transition={{ duration: 0.3 }}
       className="card overflow-hidden"
     >
-      {/* Status badge */}
+      {/* Status badge and name */}
       <div className="px-4 py-2 flex justify-between items-center border-b">
         <span 
           className={`${getStatusClass(appointment.status)} text-sm px-3 py-1 rounded-full`}
         >
           {appointment.status === 'confirmed' ? text.confirmed : text.pending}
         </span>
-        <span className="text-sm text-gray-500">#{appointment.id}</span>
+        <span className="text-sm text-gray-700 font-medium">
+          {appointment.full_name}
+        </span>
       </div>
       
       {/* Appointment details */}
       <div className="p-6">
         <div className="mb-4">
-          <h3 className="text-xl font-bold text-gray-800 mb-4">{appointment.patientName}</h3>
-          
           <div className="space-y-3">
             <div className="flex items-start">
               <FaClinicMedical className="text-primary-500 mt-1 mr-3 flex-shrink-0" />
               <div>
                 <p className="text-sm text-gray-500">{text.type}</p>
-                <p className="text-gray-700">{appointment.type}</p>
+                <p className="text-gray-700">{appointment.appointment_type}</p>
               </div>
             </div>
             
