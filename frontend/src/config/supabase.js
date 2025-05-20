@@ -81,5 +81,19 @@ export const appointments = {
             .eq('id', id)
             .select()
             .single();
+    },
+
+    // Reschedule appointment
+    reschedule: async (id, { date, time }) => {
+        return await supabase
+            .from('appointments')
+            .update({
+                date,
+                time,
+                status: 'requested' // Reset to requested status when rescheduled
+            })
+            .eq('id', id)
+            .select()
+            .single();
     }
 };

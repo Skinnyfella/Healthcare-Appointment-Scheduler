@@ -4,11 +4,14 @@ import { FaCalendarAlt, FaClock, FaClinicMedical, FaTimes } from 'react-icons/fa
 import { LanguageContext } from '../../context/LanguageContext'
 import { format } from 'date-fns'
 import { appointments } from '../../config/supabase'
+import RescheduleModal from './RescheduleModal'
 
 const AppointmentCard = ({ appointment, onUpdate }) => {
   const { language } = useContext(LanguageContext)
   const [showCancelModal, setShowCancelModal] = useState(false)
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false)
   const [isCancelling, setIsCancelling] = useState(false)
+  const [isRescheduling, setIsRescheduling] = useState(false)
   
   const translations = {
     en: {
@@ -25,7 +28,8 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
       cancelQuestion: 'Are you sure you want to cancel this appointment?',
       cancelWarning: 'This action cannot be undone.',
       confirmButton: 'Yes, Cancel',
-      cancelButton: 'No, Keep'
+      cancelButton: 'No, Keep',
+      rescheduleSuccess: 'Appointment rescheduled successfully'
     },
     es: {
       type: 'Tipo',
@@ -41,7 +45,8 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
       cancelWarning: 'Esta acción no se puede deshacer.',
       confirmButton: 'Sí, Cancelar',
       cancelButton: 'No, Mantener',
-      cancelled: 'Cancelada'
+      cancelled: 'Cancelada',
+      rescheduleSuccess: 'Cita reprogramada con éxito'
     },
     fr: {
       type: 'Type',
@@ -57,7 +62,8 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
       cancelWarning: 'Cette action ne peut pas être annulée.',
       confirmButton: 'Oui, Annuler',
       cancelButton: 'Non, Garder',
-      cancelled: 'Annulé'
+      cancelled: 'Annulé',
+      rescheduleSuccess: 'Rendez-vous reprogrammé avec succès'
     }
   }
   
@@ -90,6 +96,27 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
     } finally {
       setIsCancelling(false)
       setShowCancelModal(false)
+    }
+  }
+
+  const handleReschedule = async (newDate, newTime) => {
+    try {
+      setIsRescheduling(true)
+      const formattedDate = newDate.toISOString().split('T')[0]
+      
+      const { error } = await appointments.reschedule(appointment.id, {
+        date: formattedDate,
+        time: newTime
+      })
+      
+      if (error) throw error
+      
+      onUpdate && onUpdate()
+      setShowRescheduleModal(false)
+    } catch (err) {
+      console.error('Error rescheduling appointment:', err)
+    } finally {
+      setIsRescheduling(false)
     }
   }
 
@@ -157,7 +184,11 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
           {/* Action buttons - Only show if not cancelled */}
           {appointment.status !== 'cancelled' && (
             <div className="mt-6 flex flex-col sm:flex-row gap-2">
-              <button className="btn-outline text-sm py-2 flex-1">
+              <button 
+                className="btn-outline text-sm py-2 flex-1"
+                onClick={() => setShowRescheduleModal(true)}
+                disabled={isRescheduling}
+              >
                 {text.reschedule}
               </button>
               <button 
@@ -225,6 +256,19 @@ const AppointmentCard = ({ appointment, onUpdate }) => {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reschedule Modal */}
+      <AnimatePresence>
+        {showRescheduleModal && (
+          <RescheduleModal
+            isOpen={showRescheduleModal}
+            onClose={() => setShowRescheduleModal(false)}
+            appointment={appointment}
+            onReschedule={handleReschedule}
+            isSubmitting={isRescheduling}
+          />
         )}
       </AnimatePresence>
     </>
