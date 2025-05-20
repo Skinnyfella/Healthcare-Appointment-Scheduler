@@ -12,19 +12,19 @@ const AppointmentsPage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        const { data, error } = await appointments.getAll()
-        if (error) throw error
-        setUserAppointments(data || [])
-      } catch (err) {
-        setError(err.message)
-      } finally {
-        setLoading(false)
-      }
+  const fetchAppointments = async () => {
+    try {
+      const { data, error } = await appointments.getAll()
+      if (error) throw error
+      setUserAppointments(data || [])
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchAppointments()
   }, [])
   
@@ -102,7 +102,11 @@ const AppointmentsPage = () => {
             {sortedAppointments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {sortedAppointments.map(appointment => (
-                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                  <AppointmentCard 
+                    key={appointment.id} 
+                    appointment={appointment}
+                    onUpdate={fetchAppointments}
+                  />
                 ))}
               </div>
             ) : (
