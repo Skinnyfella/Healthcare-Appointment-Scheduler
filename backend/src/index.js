@@ -51,8 +51,24 @@ app.use((req, res, next) => {
 app.use(hpp());
 
 // 8. CORS configuration
+const allowedOrigins = [
+    'http://localhost:5173',  // Local development
+    'http://localhost:4173',  // Local preview
+    'https://healthcare-appointment-scheduler.vercel.app', // Vercel production
+    'https://healthcare-appointment-scheduler-git-main.vercel.app', // Vercel preview
+    process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+        }
+        return callback(null, true);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
