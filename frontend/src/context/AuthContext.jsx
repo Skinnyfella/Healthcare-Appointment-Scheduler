@@ -20,21 +20,25 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         });
 
-        return () => subscription.unsubscribe();
-    }, []);
+        return () => subscription.unsubscribe();    }, []);
 
     const signIn = async (email) => {
         try {
+            const redirectTo = `${window.location.origin}/book`;
             const { error } = await supabase.auth.signInWithOtp({
                 email,
                 options: {
-                    emailRedirectTo: `${window.location.origin}/book`,
-                    shouldCreateUser: true
+                    emailRedirectTo: redirectTo,
+                    shouldCreateUser: true,
+                    data: {
+                        redirectTo: redirectTo
+                    }
                 }
             });
             if (error) throw error;
             return { error: null, message: 'Check your email for the login link!' };
         } catch (error) {
+            console.error('Sign in error:', error);
             return { error: error.message, message: null };
         }
     };
